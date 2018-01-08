@@ -1,3 +1,22 @@
+/*
+
+ *
+ *       Filename:  partie3.c
+ *
+ *      Description: synchroniser les trains avec des verrous
+ *
+ *        Version:  1.0
+ *        Created:  01/01/2018 
+ *       Revision:  none
+ *       Compiler:  gcc(g++)
+                    $gcc -Wall partie3.c -pthread
+ *                  $./a.out
+ *
+ *         Author:  |Jiangning LIN|, |linjiangning90@gmail.com|
+                    |Morvan CALMEL|, |morvan.calmel@gmail.com|
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>

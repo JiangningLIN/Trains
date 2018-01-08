@@ -3,7 +3,7 @@
  *
  *       Filename:  partie1.c
  *
- *      Description: Réaliser trois trains a l'aide des mutex
+ *      Description: synchroniser les trains avec des mutex
  *
  *        Version:  1.0
  *        Created:  01/01/2018 

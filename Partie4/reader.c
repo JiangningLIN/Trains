@@ -2,10 +2,10 @@
  *
  *       Filename:  reader.c
  *
- *    Description:  lit et affiche des messages de trains
+ *    Description:  lit et affiche des messages de trains avec des files de messages
  *
  *        Version:  1.0
- *        Created:  01/02/2018
+ *        Created:  01/01/2018
  *       Revision:  none
  *       Compiler:  gcc(g++)
  *                  $gcc -Wall reader.c -o reader -lrt
@@ -60,7 +60,8 @@ int main()
     }
 
     printf("Queue \"%s\":\n\t- stores at most %ld messages\n\t- \
-        large at most %ld bytes each\n\t- currently holds %ld messages\n",
+        large at most %ld bytes each\n\t- currently holds %ld messages\n\t- \
+        with 3 trains\n",
         file, msgq_attr.mq_maxmsg, msgq_attr.mq_msgsize, msgq_attr.mq_curmsgs);
 
     if(recv_size < msgq_attr.mq_msgsize)

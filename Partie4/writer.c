@@ -3,10 +3,10 @@
  *
  *       Filename:  writer.c
  *
- *      Description: ecrit et affiche des messsages de trains
+ *      Description: ecrit et affiche des messsages de trains avec les files de messages
  *
  *        Version:  1.0
- *        Created:  01/02/2018 
+ *        Created:  01/01/2018 
  *       Revision:  none
  *       Compiler:  gcc(g++)
                     $gcc -Wall writer.c -o writer -lrt
@@ -27,8 +27,8 @@
 
 #define MAXSIZE     1024   //definie la taille de buf
 #define BUFFER      8192 //definie la taille de Msg
-#define STOP        "q"
 
+//Declare des elements de debut_train, fin_train
 char debut_train1[2];
 char fin_train1[2];
 char debut_train2[2];
@@ -36,18 +36,19 @@ char fin_train2[2];
 char debut_train3[2];
 char fin_train3[2];
 
+//Permet de limiter le calcul de la moyenne à 3 fois
 int rentre_train_un     = 0;
 int rentre_train_deux   = 0;
 int rentre_train_trois  = 0;
 
 int a=0, b=0, c=0;
-int stop = 0;
 char stream[1024];
 //Le temps
-clock_t temps;
-clock_t start,finish; 
-double TheTimes; 
+clock_t temps; 
 
+int inverse = 0;
+
+// Récupère le caractère du début et de la fin de la chaine de caractere (ex: A --> B , donne A et B )
 char *substring(size_t start, size_t stop, const char *src, char *dst, size_t size)
 {
    int count = stop - start;
@@ -64,42 +65,48 @@ void TrainUn(){
         // Récupère le trajet du train 1 en global :
         substring(0, 1, train1[a%4], debut_train1, sizeof(debut_train1));
         substring(6, 1, train1[a%4], fin_train1, sizeof(fin_train1));
-
+        inverse = 0;
+        
         // Compare avec les autres trains le trajet 
         if(strcmp(debut_train1, fin_train2) == 0 && strcmp(fin_train1, debut_train2) == 0) {
             sprintf(stream,"Train 1 en approche en sens inverse %s\n", train1[a%4] );
+            inverse = 1;
         }
         // Compare avec les autres trains le trajet 
-        else if(strcmp(debut_train1, fin_train3) == 0 && strcmp(fin_train1, debut_train3) == 0) {
+        if(strcmp(debut_train1, fin_train3) == 0 && strcmp(fin_train1, debut_train3) == 0) {
             sprintf(stream,"Train 1 en approche en sens inverse %s\n", train1[a%4] );
+            inverse = 1;
         } 
         
         //affiche les trajets de train1
-        int i = 0;
-        temps = clock() / 100;
-        i  = sprintf(stream,"temps:%f\n", (double) temps);
-        i += sprintf(stream+i,"Train 1 : %s\n", train1[a%4]);
-        // Temps du trajet de 1 à 3 secondes
-        sleep(rand()%3+1);
-        i += sprintf(stream+i,"Le train 1 est arrivé à la gare : %s\n", fin_train1);
-        stream[i-1]='\n';
+        if(!inverse){
+            int i = 0;
+            temps = clock() / 1000;
+            i  = sprintf(stream,"temps:%f\n", (double) temps);
+            i += sprintf(stream+i,"Train 1 : %s\n", train1[a%4]);
+            // Temps du trajet de 1 à 3 secondes
+            sleep(rand()%3+1);
+            i += sprintf(stream+i,"Le train 1 est arrivé à la gare : %s\n", fin_train1);
+            stream[i-1]='\n';
+            //a++;
+        }
         
         
         // Récupère le temps moyen d'un trajet complet
         if ( strcmp(debut_train1, "B") == 0 && strcmp(fin_train1, "A") == 0 && rentre_train_un == 0) {
+            int i = 0;
             //s'evite le dernier trajet n'affiche pas
-            temps = clock()/100;
+            temps = clock()/1000;
             i  = sprintf(stream,"temps:%f\n", (double) temps);
             i += sprintf(stream+i,"Train 1 : %s\n", train1[(a%4)]);
             sleep(rand()%3+1);
             i += sprintf(stream+i,"Le train 1 est arrivé à la gare : %s\n", fin_train1);
             
-            finish=clock();  
-            TheTimes=(double)((finish-start)/CLOCKS_PER_SEC); 
-            sprintf(stream+i,"Le temps moyen du train 1 est de : %f secondes\n", TheTimes);
+            clock_t temps_moyen = clock(); 
+            i += sprintf(stream+i,"Le temps moyen du train1 est de : %f secondes\n", (double) temps_moyen / 1000);
             stream[i-1]='\n';
+            
             rentre_train_deux = 1;
-            i = 0;
         }
 
         fflush(stdout);
@@ -109,44 +116,47 @@ void TrainUn(){
 
 void TrainDeux() {
     char train2[5][8] = {"A --> B", "B --> D", "D --> C", "C --> B", "B --> A"};
-    start=clock();
     if (b >= 0) {
         // Récupère le trajet du train 2 en global :
         substring(0, 1, train2[b%5], debut_train2, sizeof(debut_train2));
         substring(6, 1, train2[b%5], fin_train2, sizeof(fin_train2));
-        
+        inverse = 0;
 
         // Compare avec les autres trains le trajet 
         if(strcmp(debut_train2, fin_train3) == 0 && strcmp(fin_train2, debut_train3) == 0) {
-          sprintf(stream,"Train 2 en approche en sens inverse %s\n" , train2[b%5]);
+            inverse = 1;
+            sprintf(stream,"Train 2 en approche en sens inverse %s\n" , train2[b%5]);
         }
         // Compare avec les autres trains le trajet
-        else if(strcmp(debut_train2, fin_train1) == 0 && strcmp(fin_train2, debut_train1) == 0) {
-          sprintf(stream,"Train 2 en approche en sens inverse %s\n" , train2[b%5]);
+        if(strcmp(debut_train2, fin_train1) == 0 && strcmp(fin_train2, debut_train1) == 0) {
+            inverse = 1;
+            sprintf(stream,"Train 2 en approche en sens inverse %s\n" , train2[b%5]);
         }
         //Affiche les trajets
-        int i = 0;
-        temps = clock() / 100;
-        i  = sprintf(stream,"temps:%f\n", (double) temps);
-        i += sprintf(stream +i,"Train 2 : %s\n", train2[(b%5)]);
-        sleep(rand()%3+1);
-        i += sprintf(stream+i,"Le train 2 est arrivé à la gare : %s\n", fin_train2);
-        stream[i-1]='\n';
+        if(!inverse){
+            int i = 0;
+            temps = clock() / 1000;
+            i  = sprintf(stream,"temps:%f\n", (double) temps);
+            i += sprintf(stream +i,"Train 2 : %s\n", train2[(b%5)]);
+            sleep(rand()%3+1);
+            i += sprintf(stream+i,"Le train 2 est arrivé à la gare : %s\n", fin_train2);
+            stream[i-1]='\n';
+        }
+        
           
         // Récupère le temps moyen d'un trajet complet
         if ( strcmp(debut_train2, "B") == 0 && strcmp(fin_train2, "A") == 0 && rentre_train_deux == 0) {
-            
-            temps = clock()/100;
+            int i = 0;
+            temps = clock()/1000;
             i  = sprintf(stream,"temps:%f\n", (double) temps);
             i += sprintf(stream+i,"Train 2 : %s\n", train2[(b%5)]);
             sleep(rand()%3+1);
             i += sprintf(stream+i,"Le train 2 est arrivé à la gare : %s\n", fin_train3);
-            finish=clock();  
-            TheTimes=(double)((finish-start)/CLOCKS_PER_SEC); 
-            sprintf(stream+i,"Le temps moyen du train 2 est de : %f secondes\n", TheTimes);
+            
+            clock_t temps_moyen = clock(); 
+            i += sprintf(stream+i,"Le temps moyen du train2 est de : %f secondes\n", (double) temps_moyen / 1000);
             stream[i-1]='\n';
             rentre_train_deux = 1;
-            i = 0;
         }
         fflush(stdout);
         b++;
@@ -155,43 +165,44 @@ void TrainDeux() {
 
 void TrainTrois() {
     char train3[5][8] = {"A --> B", "B --> D", "D --> C", "C --> E", "E --> A"};
-    int i = 0 ;
-    start=clock(); 
     if (c >= 0) {
         // Récupère le trajet du train 3 en global :
         substring(0, 1, train3[c%5], debut_train3, sizeof(debut_train3));
         substring(6, 1, train3[c%5], fin_train3, sizeof(fin_train3));
-        
+        inverse = 0;
         // Compare avec les autres trains le trajet :
         if(strcmp(debut_train3, fin_train2) == 0 && strcmp(fin_train3, debut_train2) == 0) {
+          inverse = 1;
           sprintf(stream,"Train 3 en approche en sens inverse %s\n", train3[(c%5)] );
         }
         if(strcmp(debut_train3, fin_train1) == 0 && strcmp(fin_train3, debut_train1) == 0) {
+          inverse = 1;
           sprintf(stream,"Train 3 en approche en sens inverse %s\n", train3[(c%5)]);
         }
-         
-         temps = clock() / 100;
-         i  = sprintf(stream,"temps:%f\n", (double) temps);
-         i += sprintf(stream+i,"Train 3 : %s\n", train3[(c%5)]);
-         sleep(rand()%3+1);
-         sprintf(stream+i,"Le train 3 est arrivé à la gare : %s\n", fin_train3);
-         stream[i-1]='\n';
-         fflush(stdout);
-         i = 0;
+         if(!inverse){
+            int i = 0;
+            temps = clock() / 1000;
+            i  = sprintf(stream,"temps:%f\n", (double) temps);
+            i += sprintf(stream+i,"Train 3 : %s\n", train3[(c%5)]);
+            sleep(rand()%3+1);
+            sprintf(stream+i,"Le train 3 est arrivé à la gare : %s\n", fin_train3);
+            stream[i-1]='\n';
+            fflush(stdout);
+        }
+ 
         // Récupère le temps moyen d'un trajet complet
         if ( strcmp(debut_train3, "E") == 0 && strcmp(fin_train3, "A") == 0 && rentre_train_trois == 0) {
-            temps = clock()/100;
+            int i =0;
+            temps = clock()/1000;
             i  = sprintf(stream,"temps:%f\n", (double) temps);
             i += sprintf(stream+i,"Train 3 : %s\n", train3[(c%5)]);
             sleep(rand()%3+1);
             i += sprintf(stream+i,"Le train 3 est arrivé à la gare : %s\n", fin_train3);
-            stream[i-1]='\n';
             
-            finish=clock();  
-            TheTimes=(double)((finish-start)/CLOCKS_PER_SEC); 
-            sprintf(stream+i,"Le temps moyen du train 3 est de : %f secondes\n", TheTimes);
+            clock_t temps_moyen = clock(); 
+            i += sprintf(stream+i,"Le temps moyen du train 3 est de : %f secondes\n", (double) temps_moyen / 1000);
             rentre_train_trois = 1;
-            i = 0;
+            stream[i-1]='\n';
         }
         fflush(stdout);
         c++;
@@ -217,7 +228,7 @@ int main()
     
     /* initialize the queue attributes */
     msgq_attr.mq_flags = 0;
-    msgq_attr.mq_maxmsg = 1024;
+    msgq_attr.mq_maxmsg = 10;
     msgq_attr.mq_msgsize = sizeof(msg);
     msgq_attr.mq_curmsgs = 0;
 
